@@ -12,9 +12,9 @@ func NewId() string {
 }
 
 type CreateResponse struct {
-  Message string `json:"message"`
-  Id string `json:"id"`
-  Links []Link `json:"_links"`
+	Message string `json:"message"`
+	Id      string `json:"id"`
+	Links   []Link `json:"_links"`
 }
 
 type Error struct {
@@ -22,28 +22,26 @@ type Error struct {
 }
 
 type Link struct {
-  Instance string `json:"instance"`
+	Instance string `json:"instance"`
 }
 
-
-
 func BuildCreateResponse(id string, instanceType string) CreateResponse {
-  //TODO: add http uri of current server url as link
-  link := fmt.Sprintf("/%s/%s",instanceType, id)
-  return CreateResponse{ Message: "Created", Id: id,  Links: []Link{Link{Instance: link}}}
+	//TODO: add http uri of current server url as link
+	link := fmt.Sprintf("/%s/%s", instanceType, id)
+	return CreateResponse{Message: "Created", Id: id, Links: []Link{Link{Instance: link}}}
 }
 
 func SendStatusCreated(w http.ResponseWriter, r *http.Request, response CreateResponse) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
-  json, _ := json.Marshal(response)
-  w.Write(json)
+	json, _ := json.Marshal(response)
+	w.Write(json)
 }
 
 func SendResult(w http.ResponseWriter, r *http.Request, resultJSON []byte) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
-  w.Write(resultJSON)
+	w.Write(resultJSON)
 }
 
 func SendStatusOK(w http.ResponseWriter, r *http.Request) {

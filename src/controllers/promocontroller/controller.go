@@ -10,12 +10,12 @@ package promocontroller
 import (
 	"encoding/json"
 	"net/http"
-  "utils"
-  "promocache"
+	"promocache"
+	"utils"
 )
 
 func GetPromos(w http.ResponseWriter, r *http.Request) {
-  promos := promocache.GetPromoCache().GetAll()
-  json, _ := json.Marshal(promos)
-  utils.SendResult(w, r, json)
+	promos := promocache.GetPromoCache().GetAll()
+	json, _ := json.Marshal(promos)
+	utils.SendResult(w, r, json)
 }

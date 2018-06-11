@@ -1,27 +1,35 @@
 package main
 
-import "promocalc"
-//import "router"
-import "models"
-import "fmt"
+//import "promocalc"
+import "router"
+//import "models"
+//import "fmt"
 
 func main() {
-	//router.Start()
-	//select {}
-
+	router.Start()
+	select {}
+  /*
   var p promocalc.Calculator
   p = &promocalc.PromoCalculator{}
 
-  promo1 := models.Promo { Id: "promo1",
-  Description: "if you buy 2 or more trousers, you get 15 percent off belts and shoes",
-  Buys: []models.Buy{ models.Buy{ Category: "trousers", Count: 2 }  },
-  Gets: []models.Get{ models.Get{ Category: "belts", All: true, Off: models.Off{ Discount: &models.Discount{Percentage: 15} } },
-   models.Get{ Category: "shoes", All: true, Off: models.Off{ Discount: &models.Discount{Percentage: 15} } } }}
+  //if you buy two shirts, each additional shirt costs only 45$
+  promo2 := models.Promo { Id: "promo2",
+  Description: "if you buy two shirts, each additional shirt costs only 45$",
+  Buys: []models.Buy{ models.Buy{ Category: "shirts", Count: 2 }  },
+  Gets: []models.Get{ models.Get{ Category: "shirts", All: true, Off: models.Off{ Fixed: &models.Fixed{Price: 45} } } }}
+
+  //if you purchase 3 or more shirts, all ties are half price
+  promo3 := models.Promo { Id: "promo3",
+  Description: "if you purchase 3 or more shirts, all ties are half price",
+  Buys: []models.Buy{ models.Buy{ Category: "shirts", Count: 3 }  },
+  Gets: []models.Get{ models.Get{ Category: "ties", All: true, Off: models.Off{ Discount: &models.Discount{Percentage: 50} } } }}
+
 
   cart := &models.Cart { Items: []models.Item{
-    models.Item { Category: "trousers", Price: float32(100) }, models.Item { Category: "trousers", Price: float32(200) }, models.Item { Category: "belts", Price: float32(130) } } }
+    models.Item { Category: "shirts", Price: float32(100) }, models.Item { Category: "shirts", Price: float32(200) }, models.Item { Category: "shirts", Price: float32(130) }, models.Item { Category: "ties", Price: float32(50) }, models.Item { Category: "ties", Price: float32(80) } } }
 
-  r := p.ApplyPromos([]models.Promo{promo1}, cart)
+  r := p.ApplyPromos([]models.Promo{promo2, promo3}, cart)
   fmt.Println(r)
-  
+  */
+
 }

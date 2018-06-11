@@ -4,7 +4,7 @@ package promocalc
 import "models"
 
 type Calculator interface {
-	ApplyPromos(promo []models.Promo, cart *models.Cart) []models.MarkedItem
+	ApplyPromos(promo []models.Promo, cart *models.Cart) models.PromofiedCart
 }
 
 type appliedBuys struct {
@@ -108,34 +108,60 @@ type PromoCalculator struct {
 }
 
 func (p *PromoCalculator) applyPromo(promo models.Promo, groupedItems map[string]([]models.MarkedItem)) map[string]([]models.MarkedItem) {
-	for ;true; {
+	for true {
 		var appliedBuys = applyBuys(groupedItems, promo)
 		if !appliedBuys.applied {
-      break;
-    }
+			break
+		}
 		groupedItems = appliedBuys.groupedItems
 		groupedItems = applyGets(groupedItems, promo)
 	}
-  return groupedItems
+	return groupedItems
 }
 
-func (p *PromoCalculator) ApplyPromos(promos []models.Promo, cart *models.Cart) []models.MarkedItem {
-  groupedItems := make(map[string]([]models.MarkedItem))
+func getMinOffPrice(originalPrice float32, item models.MarkedItem) float32 {
+	if len(item.MarkedGets) == 0 {
+		return originalPrice
+	}
+	minPrice := originalPrice
+	for _, offPrice := range item.MarkedGets {
+		if minPrice > offPrice {
+			minPrice = offPrice
+		}
+	}
+	return minPrice
+}
+
+func computePrices(items []models.MarkedItem) (totalPrice float32, totalOffPrice float32) {
+	totalPrice = 0
+	totalOffPrice = 0
+	for _, markedItem := range items {
+		totalPrice = totalPrice + markedItem.Item.Price
+		// if multiple promos apply, take the one with the lowest price
+		totalOffPrice = totalOffPrice + getMinOffPrice(markedItem.Item.Price, markedItem)
+	}
+	return totalPrice, totalOffPrice
+}
+
+func (p *PromoCalculator) ApplyPromos(promos []models.Promo, cart *models.Cart) models.PromofiedCart {
+	groupedItems := make(map[string]([]models.MarkedItem))
 	for _, item := range cart.Items {
 		groupedItems[item.Category] = append(groupedItems[item.Category],
 			models.MarkedItem{Item: item, MarkedBuys: make(map[string]bool), MarkedGets: make(map[string]float32)})
 	}
-  for _, promo := range promos {
-    groupedItems = p.applyPromo(promo, groupedItems)
-  }
-  items := make([]models.MarkedItem, 0)
-  for _, item := range groupedItems {
-    items = append(items, item...)
-  }
-  return items
+	for _, promo := range promos {
+		groupedItems = p.applyPromo(promo, groupedItems)
+	}
+	items := make([]models.MarkedItem, 0)
+	for _, item := range groupedItems {
+		items = append(items, item...)
+	}
+	totalPrice, totalOffPrice := computePrices(items)
+	promofiedCart := models.PromofiedCart{Items: items, TotalPrice: totalPrice, TotalOffPrice: totalOffPrice}
+	return promofiedCart
 }
 
 func NewCalculator() Calculator {
-  p := &PromoCalculator{}
-  return p
+	p := &PromoCalculator{}
+	return p
 }
