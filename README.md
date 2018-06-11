@@ -186,6 +186,11 @@ The project has the following limitations. These limitations can be addressed in
     3.1 The changes in promotions can be communicated as events to cart service
 3. Once promotions have been applied on cart, the resultant cart (also called as promofied cart) can be cached (unless an applied promotion changes or a new item is added, or deleted)
 4. Currently all carts are held in memory. But this funcationaly is encapsulated behind a "repository" interface. A redis based repository needs to be implemented
-5. No logging or units tests are implemented
+5. No logging is implemented
+6. Limited unit tests (only a few unit tests have been implemented; need to add more unit tests)
+
+### Units tests
+Currently only promocalc package has unit tests 
+go test promocalc -v
 
 
