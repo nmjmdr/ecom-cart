@@ -37,7 +37,7 @@ type Promo struct {
 type PromofiedCart struct {
 	TotalPrice    float32      `json:"totalPrice"`
 	TotalOffPrice float32      `json:"totalOffPrice"`
-	Items         []MarkedItem `json:"itemsMarkedWithPromos"`
+	Items         []MarkedItem `json:"items"`
 }
 
 type MarkedItem struct {

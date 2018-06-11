@@ -8,6 +8,6 @@ type Item struct {
 }
 
 type Cart struct {
-	Id    string
+	Id    string `json:"id"`
 	Items []Item `json:"items"`
 }
