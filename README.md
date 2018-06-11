@@ -8,6 +8,48 @@ ecom-cart implements a promotion engine which can compute promotion rules such a
 
 Notice that fourth rule (buy 2 shirts and get 1 shirt free) has to be applied in such way if the customer has purchased 7 shirts then two of them should be free.
 
+## Installation and Usage
+This project follows a slightly different structure from the recommended GOLang guidelines. (This can be corrected later) The packages are contained within the project folder under `src` folder
+The project depends upon:
+1. "github.com/gorilla/mux"
+2. "github.com/satori/go.uuid"
+To install the dependencies run the following commands in project folder:
+```
+go get -u github.com/satori/go.uuid
+go get -u github.com/gorilla/mux"
+```
+To run the project:
+```
+go run main.go
+```
+### Usage:
+1. Create a cart
+Ex: cart with - two trousers, three shirts, one belt, one shoe
+```
+curl localhost:8090/carts -X POST -d '{ "items": [{"name": "t1", "category": "trousers", "price": 100}, {"name": "t2", "category": "trousers", "price": 110}, {"name": "belt-1", "category": "belts", "price": 100}, {"name": "shoe-1", "category": "shoes", "price": 100}, {"name": "s1", "category": "shirts", "price": 120}, {"name": "s2", "category": "shirts", "price": 90}, {"name": "s3", "category": "shirts", "price": 65} ] }'
+
+Response:
+{"message":"Created","id":"06f9af8a-d312-41a7-9576-f097958cc61f","_links":[{"instance":"/carts/06f9af8a-d312-41a7-9576-f097958cc61f"}]}
+```
+The cart is now created and assigned a unique id
+
+2. Get a cart
+```
+curl localhost:8090/carts/06f9af8a-d312-41a7-9576-f097958cc61f
+
+Response:
+{"id":"06f9af8a-d312-41a7-9576-f097958cc61f",
+"items":[
+{"id":"","name":"t1","category":"trousers","price":100},
+{"id":"","name":"t2","category":"trousers","price":110},
+{"id":"","name":"belt-1","category":"belts","price":100},
+{"id":"","name":"shoe-1","category":"shoes","price":100},
+{"id":"","name":"s1","category":"shirts","price":120},
+{"id":"","name":"s2","category":"shirts","price":90},
+{"id":"","name":"s3","category":"shirts","price":65}
+]
+}
+```
 
 ## Design Details
 Given time, the project would follow the below design approach:
