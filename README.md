@@ -12,7 +12,7 @@ Notice that fourth rule (buy 2 shirts and get 1 shirt free) has to be applied in
 ## Design Details
 Given time the project would follow the below design approach:
 
-
+ 
 
 ## Limitations:
 The project has the following limitations. These limitations can be addressed in future
