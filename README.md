@@ -178,6 +178,26 @@ Examples promos as GO code:
 		Gets:        []models.Get{models.Get{Category: "shirts", All: true, Off: models.Off{Fixed: &models.Fixed{Price: 45}}}}}
 ```
 
+### Algorithm for apply promos:
+The algorithm to apply promos, groups items by category so that it can access items efficiently. Then for a given promo it executes the following logic
+```
+for true {
+        // check if any of the items (or combination of items) can act as triggers (or sources) for current promo
+	var appliedBuys = applyBuys(groupedItems, promo)
+	// if none of the items were triggers (or sources) for the current promo, break and return
+	if !appliedBuys.applied {
+		break
+	}
+	groupedItems = appliedBuys.groupedItems
+	// pass grouped items to apply promos 
+	// applyGets identifies the target items for a given promo and applies them
+	groupedItems = applyGets(groupedItems, promo)
+	}
+```
+_Note that the logic has to be repeatdely applied until it none of the target (or source) items match. This is required to especially implement rules such as "Buy 2 Get 1 Free"_
+
+
+
 Currently the project has been implemented with the following limitations:
 The project has the following limitations. These limitations can be addressed in future
 
@@ -186,6 +206,11 @@ The project has the following limitations. These limitations can be addressed in
     3.1 The changes in promotions can be communicated as events to cart service
 3. Once promotions have been applied on cart, the resultant cart (also called as promofied cart) can be cached (unless an applied promotion changes or a new item is added, or deleted)
 4. Currently all carts are held in memory. But this funcationaly is encapsulated behind a "repository" interface. A redis based repository needs to be implemented
-5. No logging or units tests are implemented
+5. No logging is implemented
+6. Limited unit tests (only a few unit tests have been implemented; need to add more unit tests)
+
+### Units tests
+Currently only promocalc package has unit tests 
+go test promocalc -v
 
 
