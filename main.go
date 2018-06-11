@@ -1,8 +1,12 @@
 package main
 
-import "promocalc"
+//import "promocalc"
+import "router"
 
 func main() {
+  router.Start()
+  select {}
+  /*
   var p promocalc.Calculator
   p = &promocalc.PromoCalculator{}
 
@@ -17,4 +21,5 @@ func main() {
     promocalc.Item { Category: "shirts", Price: float32(100) }, promocalc.Item { Category: "shirts", Price: float32(200) }, promocalc.Item { Category: "shirts", Price: float32(130) } } }
 
   p.Calculate(promo, cart)
+  */
 }
