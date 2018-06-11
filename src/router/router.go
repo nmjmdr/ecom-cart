@@ -3,7 +3,8 @@ package router
 import "github.com/gorilla/mux"
 import "net/http"
 import "fmt"
-import "cartcontroller"
+import "controllers/cartcontroller"
+import "controllers/promocontroller"
 
 func Start() {
 	r := mux.NewRouter()
@@ -16,7 +17,16 @@ func Start() {
 
   // Add these later
   //r.HandleFunc("/carts/{id}/items", itemController.Create).Methods("POST")
-  //r.HandleFund("/carts/{cartId}/items/{itemId}", itemController.Delete).Methods("DELETE")
+  //r.HandleFunc("/carts/{cartId}/items/{itemId}", itemController.Delete).Methods("DELETE")
+
+  // This would be a CPU intensive request
+  // Could be move to its own service, if it needs to be scaled
+  // It can be scaled easily as it does not hold state
+  r.HandleFunc("/carts/{cartId}/promofied",cartcontroller.ApplyPromos).Methods("POST")
+
+
+  // Ideally the below controller would its own service
+  r.HandleFunc("/promos",promocontroller.GetPromos).Methods("GET")
 
 	go func() {
 		if err := http.ListenAndServe(":8090", r); err != nil {

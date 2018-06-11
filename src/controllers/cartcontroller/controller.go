@@ -8,6 +8,7 @@ import (
   "repository"
   "github.com/gorilla/mux"
   "errors"
+  "fmt"
 )
 
 
@@ -45,6 +46,35 @@ func Get(w http.ResponseWriter, r *http.Request) {
   }
   json, _ := json.Marshal(cart)
   utils.SendResult(w, r, json)
+}
+
+type PromofyRequest struct {
+  // ids of promos to apply
+  Promos []string `json:"promos"`
+}
+
+func parsePromofyRequest(request *http.Request) (error, PromofyRequest) {
+	decoder := json.NewDecoder(request.Body)
+	var req PromofyRequest
+	err := decoder.Decode(&req)
+	// TODO: Ideally should validate the JSON here
+	return err, req
+}
+
+func ApplyPromos(w http.ResponseWriter, r *http.Request) {
+  vars := mux.Vars(r)
+  id := vars["cartId"]
+  if len(id) == 0 {
+    utils.SendErrorResponse(w, r, errors.New("Invalid cart id passed"))
+    return
+  }
+  err, promofyRequest := parsePromofyRequest(r)
+	if err != nil {
+		utils.SendErrorResponse(w, r, err)
+		return
+	}
+  fmt.Println(promofyRequest, err)
+  utils.SendStatusOK(w, r)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {

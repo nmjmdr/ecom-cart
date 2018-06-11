@@ -1,52 +1,15 @@
 package promocalc
 
 import "fmt"
+import "models"
 
-type Item struct {
-	Category string
-	Price    float32
-}
-
-type Cart struct {
-	Items []Item
-}
-
-type Buy struct {
-	Category string
-	Count    int
-}
-
-type Discount struct {
-	Percentage float32
-}
-
-type Fixed struct {
-	Price float32
-}
-
-type Off struct {
-	Discount *Discount
-	Fixed    *Fixed
-}
-type Get struct {
-	Category string
-	All      bool
-	Count    int
-	Off      Off
-}
-
-type Promo struct {
-	Id   string
-	Buys []Buy
-	Gets []Get
-}
 
 type Calculator interface {
-	Calculate(promo Promo, cart *Cart)
+	Calculate(promo models.Promo, cart *models.Cart)
 }
 
 type markedItem struct {
-	item       Item
+	item       models.Item
 	markedBuys map[string]bool
 	markedGets map[string]float32
 }
@@ -61,7 +24,7 @@ type appliedBuy struct {
 	groupedItems map[string]([]markedItem)
 }
 
-func markBuyItems(groupedItems map[string]([]markedItem), buy Buy, promo Promo) map[string]([]markedItem) {
+func markBuyItems(groupedItems map[string]([]markedItem), buy models.Buy, promo models.Promo) map[string]([]markedItem) {
 	markCount := 0
 	for i := 0; i < len(groupedItems[buy.Category]); i++ {
 		item := groupedItems[buy.Category][i]
@@ -78,7 +41,7 @@ func markBuyItems(groupedItems map[string]([]markedItem), buy Buy, promo Promo) 
 	return groupedItems
 }
 
-func applyBuy(buy Buy, groupedItems map[string]([]markedItem), promo Promo) appliedBuy {
+func applyBuy(buy models.Buy, groupedItems map[string]([]markedItem), promo models.Promo) appliedBuy {
 	_, ok := groupedItems[buy.Category]
 	if !ok {
 		return appliedBuy{applied: false, groupedItems: groupedItems}
@@ -98,7 +61,7 @@ func applyBuy(buy Buy, groupedItems map[string]([]markedItem), promo Promo) appl
 	return appliedBuy{applied: true, groupedItems: groupedItems}
 }
 
-func applyBuys(groupedItems map[string]([]markedItem), promo Promo) appliedBuys {
+func applyBuys(groupedItems map[string]([]markedItem), promo models.Promo) appliedBuys {
 	applied := true
 	for _, buy := range promo.Buys {
 		appliedBuy := applyBuy(buy, groupedItems, promo)
@@ -107,7 +70,7 @@ func applyBuys(groupedItems map[string]([]markedItem), promo Promo) appliedBuys 
 	return appliedBuys{applied: applied, groupedItems: groupedItems}
 }
 
-func computeOffPrice(price float32, off Off) float32 {
+func computeOffPrice(price float32, off models.Off) float32 {
 	if off.Discount != nil {
 		return price - (price * off.Discount.Percentage / 100)
 	} else {
@@ -115,7 +78,7 @@ func computeOffPrice(price float32, off Off) float32 {
 	}
 }
 
-func markGetItems(groupedItems map[string]([]markedItem), get Get, promo Promo) map[string]([]markedItem) {
+func markGetItems(groupedItems map[string]([]markedItem), get models.Get, promo models.Promo) map[string]([]markedItem) {
 	markCount := 0
 	for i := 0; i < len(groupedItems[get.Category]); i++ {
 		item := groupedItems[get.Category][i]
@@ -132,7 +95,7 @@ func markGetItems(groupedItems map[string]([]markedItem), get Get, promo Promo) 
 	return groupedItems
 }
 
-func applyGet(get Get, groupedItems map[string]([]markedItem), promo Promo) map[string]([]markedItem) {
+func applyGet(get models.Get, groupedItems map[string]([]markedItem), promo models.Promo) map[string]([]markedItem) {
 	_, ok := groupedItems[get.Category]
 	if !ok {
 		return groupedItems
@@ -141,7 +104,7 @@ func applyGet(get Get, groupedItems map[string]([]markedItem), promo Promo) map[
 	return groupedItems
 }
 
-func applyGets(groupedItems map[string]([]markedItem), promo Promo) map[string]([]markedItem) {
+func applyGets(groupedItems map[string]([]markedItem), promo models.Promo) map[string]([]markedItem) {
 	for _, get := range promo.Gets {
 		groupedItems = applyGet(get, groupedItems, promo)
 	}
@@ -151,7 +114,7 @@ func applyGets(groupedItems map[string]([]markedItem), promo Promo) map[string](
 type PromoCalculator struct {
 }
 
-func (p *PromoCalculator) Calculate(promo Promo, cart *Cart) {
+func (p *PromoCalculator) Calculate(promo models.Promo, cart *models.Cart) {
 	groupedItems := make(map[string]([]markedItem))
 	for _, item := range cart.Items {
 		groupedItems[item.Category] = append(groupedItems[item.Category],
