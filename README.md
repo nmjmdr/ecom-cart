@@ -50,6 +50,58 @@ Response:
 ]
 }
 ```
+3. Get available promos:
+```
+curl localhost:8090/promos
+
+Response:
+
+[
+  {
+    "id": "promo2",
+    "description": "if you buy two shirts, each additional shirt costs only 45$",
+    "buys": [ { "category": "shirts", "count": 2 } ],
+    "gets": [ { "category": "shirts", "all": true, "count": 0, "off": { "discount": null, "fixed": { "price": 45 } } ]
+  },
+  {
+    "id": "promo3",
+    "description": "if you purchase 3 or more shirts, all ties are half price",
+  ... 
+```
+4. Apply promos
+Note: Applies the following promos:
+1. promo1 = if you buy 2 or more trousers, you get 15% off belts and shoes 
+2. promo2 = if you buy two shirts, each additional shirt costs only 45$
+```
+curl localhost:8090/carts/06f9af8a-d312-41a7-9576-f097958cc61f/promofied -X POST -d '{ "promos": ["promo1","promo2"] }'
+
+Reponse:
+{
+"totalPrice":685,
+"totalOffPrice":635,
+
+"items":[
+{"Item":{"id":"","name":"t1","category":"trousers","price":100},"sourceForPromos":{"promo1":true},"targetForPromos":{}},
+{"Item":{"id":"","name":"t2","category":"trousers","price":110},"sourceForPromos":{"promo1":true},"targetForPromos":{}},
+{"Item":{"id":"","name":"belt-1","category":"belts","price":100},"sourceForPromos":{},"targetForPromos":{"promo1":85}},
+{"Item":{"id":"","name":"shoe-1","category":"shoes","price":100},"sourceForPromos":{},"targetForPromos":{"promo1":85}},
+{"Item":{"id":"","name":"s1","category":"shirts","price":120},"sourceForPromos":{"promo2":true},"targetForPromos":{}},
+{"Item":{"id":"","name":"s2","category":"shirts","price":90},"sourceForPromos":{"promo2":true},"targetForPromos":{}},
+{"Item":{"id":"","name":"s3","category":"shirts","price":65},"sourceForPromos":{},"targetForPromos":{"promo2":45}}
+]
+}
+```
+The property `sourceForPromos` indicactes the list of promos for which the item is a source or a trigger.
+he property `targetForPromos` indicactes the list of promos that have been applied for the item.
+
+_If more than one promo applies to an item, the off-price (or discounted price) is taken to be the minimum of all promo applications_
+So if for an item with sale price of 100, two promos apply, one with price = 95$ and other with prie = 85$. Then 85$ is considered as the `off price`.
+
+5. Delete a cart
+```
+curl -X DELETE localhost:8090/carts/06f9af8a-d312-41a7-9576-f097958cc61f
+Returns: 200 OK (probably ideally should 204 - No content)
+```
 
 ## Design Details
 Given time, the project would follow the below design approach:
