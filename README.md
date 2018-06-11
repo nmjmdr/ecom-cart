@@ -36,8 +36,53 @@ _Cart Service:_
     }
 . PromoController
     - GET: /promos : Gets all promos (as JSON objects) 
+. PromoCalc : Computes and applies the promotions to a cart
+. PromoCache: Provides the promos that can be applied. Currently the four promos have been hardcoded in the code. The PromoController can be easily extended to support addition of new promos
+. Repository: Stores all carts. Currently an in-memory version of the repository has been immplemented. This needs to be changed to use Redis.
 ```
+## Representation of a promo:
+A promo is represented as follows:
+```
+{
+  id: "promo-id",
+  description "Buy two shirt and a trouser and get a shirt free"
+  buys: [
+     { 
+       category: "shirts",
+       count: 2
+     },
+     {
+       category: "trousers",
+       count: 1
+     }
+  ],
+ gets: [
+   {
+     category: "shirts"
+     count: 1,
+     off : {
+       discount: { percentage: 100 } 
+     }
+   }
+ ]
+```
+The above promo represents `Buy two shirt and a trouser and get a shirt free`. As it can be observed, the schema to represent a promo is quite flexible and can be used to represent different promo rules.
 
+Examples promos as GO code:
+```
+// if you buy 2 or more trousers, you get 15% off belts and shoes
+	promo1 := models.Promo{Id: "promo1",
+		Description: "if you buy 2 or more trousers, you get 15 percent off belts and shoes",
+		Buys:        []models.Buy{models.Buy{Category: "trousers", Count: 2}},
+		Gets: []models.Get{models.Get{Category: "belts", All: true, Off: models.Off{Discount: &models.Discount{Percentage: 15}}},
+			models.Get{Category: "shoes", All: true, Off: models.Off{Discount: &models.Discount{Percentage: 15}}}}}
+
+	//if you buy two shirts, each additional shirt costs only 45$
+	promo2 := models.Promo{Id: "promo2",
+		Description: "if you buy two shirts, each additional shirt costs only 45$",
+		Buys:        []models.Buy{models.Buy{Category: "shirts", Count: 2}},
+		Gets:        []models.Get{models.Get{Category: "shirts", All: true, Off: models.Off{Fixed: &models.Fixed{Price: 45}}}}}
+```
 
 Currently the project has been implemented with the following limitations:
 The project has the following limitations. These limitations can be addressed in future
