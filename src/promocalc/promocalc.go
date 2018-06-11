@@ -1,55 +1,48 @@
 package promocalc
 
-import "fmt"
+//import "fmt"
 import "models"
 
-
 type Calculator interface {
-	Calculate(promo models.Promo, cart *models.Cart)
-}
-
-type markedItem struct {
-	item       models.Item
-	markedBuys map[string]bool
-	markedGets map[string]float32
+	ApplyPromos(promo []models.Promo, cart *models.Cart) []models.MarkedItem
 }
 
 type appliedBuys struct {
 	applied      bool
-	groupedItems map[string]([]markedItem)
+	groupedItems map[string]([]models.MarkedItem)
 }
 
 type appliedBuy struct {
 	applied      bool
-	groupedItems map[string]([]markedItem)
+	groupedItems map[string]([]models.MarkedItem)
 }
 
-func markBuyItems(groupedItems map[string]([]markedItem), buy models.Buy, promo models.Promo) map[string]([]markedItem) {
+func markBuyItems(groupedItems map[string]([]models.MarkedItem), buy models.Buy, promo models.Promo) map[string]([]models.MarkedItem) {
 	markCount := 0
 	for i := 0; i < len(groupedItems[buy.Category]); i++ {
 		item := groupedItems[buy.Category][i]
 		if markCount == buy.Count {
 			break
 		}
-		_, isMarkedBuy := item.markedBuys[promo.Id]
-		_, isMarkedGet := item.markedGets[promo.Id]
+		_, isMarkedBuy := item.MarkedBuys[promo.Id]
+		_, isMarkedGet := item.MarkedGets[promo.Id]
 		if !isMarkedBuy && !isMarkedGet {
-			groupedItems[buy.Category][i].markedBuys[promo.Id] = true
+			groupedItems[buy.Category][i].MarkedBuys[promo.Id] = true
 			markCount = markCount + 1
 		}
 	}
 	return groupedItems
 }
 
-func applyBuy(buy models.Buy, groupedItems map[string]([]markedItem), promo models.Promo) appliedBuy {
+func applyBuy(buy models.Buy, groupedItems map[string]([]models.MarkedItem), promo models.Promo) appliedBuy {
 	_, ok := groupedItems[buy.Category]
 	if !ok {
 		return appliedBuy{applied: false, groupedItems: groupedItems}
 	}
-	var matchedItems []markedItem
+	var matchedItems []models.MarkedItem
 	for _, item := range groupedItems[buy.Category] {
-		_, isMarkedBuy := item.markedBuys[promo.Id]
-		_, isMarkedGet := item.markedGets[promo.Id]
+		_, isMarkedBuy := item.MarkedBuys[promo.Id]
+		_, isMarkedGet := item.MarkedGets[promo.Id]
 		if !isMarkedBuy && !isMarkedGet {
 			matchedItems = append(matchedItems, item)
 		}
@@ -61,7 +54,7 @@ func applyBuy(buy models.Buy, groupedItems map[string]([]markedItem), promo mode
 	return appliedBuy{applied: true, groupedItems: groupedItems}
 }
 
-func applyBuys(groupedItems map[string]([]markedItem), promo models.Promo) appliedBuys {
+func applyBuys(groupedItems map[string]([]models.MarkedItem), promo models.Promo) appliedBuys {
 	applied := true
 	for _, buy := range promo.Buys {
 		appliedBuy := applyBuy(buy, groupedItems, promo)
@@ -78,24 +71,24 @@ func computeOffPrice(price float32, off models.Off) float32 {
 	}
 }
 
-func markGetItems(groupedItems map[string]([]markedItem), get models.Get, promo models.Promo) map[string]([]markedItem) {
+func markGetItems(groupedItems map[string]([]models.MarkedItem), get models.Get, promo models.Promo) map[string]([]models.MarkedItem) {
 	markCount := 0
 	for i := 0; i < len(groupedItems[get.Category]); i++ {
 		item := groupedItems[get.Category][i]
-		if markCount == get.Count {
+		if get.All == false && markCount == get.Count {
 			break
 		}
-		_, isMarkedBuy := item.markedBuys[promo.Id]
-		_, isMarkedGet := item.markedGets[promo.Id]
+		_, isMarkedBuy := item.MarkedBuys[promo.Id]
+		_, isMarkedGet := item.MarkedGets[promo.Id]
 		if !isMarkedBuy && !isMarkedGet {
-			groupedItems[get.Category][i].markedGets[promo.Id] = computeOffPrice(item.item.Price, get.Off)
+			groupedItems[get.Category][i].MarkedGets[promo.Id] = computeOffPrice(item.Item.Price, get.Off)
 			markCount = markCount + 1
 		}
 	}
 	return groupedItems
 }
 
-func applyGet(get models.Get, groupedItems map[string]([]markedItem), promo models.Promo) map[string]([]markedItem) {
+func applyGet(get models.Get, groupedItems map[string]([]models.MarkedItem), promo models.Promo) map[string]([]models.MarkedItem) {
 	_, ok := groupedItems[get.Category]
 	if !ok {
 		return groupedItems
@@ -104,7 +97,7 @@ func applyGet(get models.Get, groupedItems map[string]([]markedItem), promo mode
 	return groupedItems
 }
 
-func applyGets(groupedItems map[string]([]markedItem), promo models.Promo) map[string]([]markedItem) {
+func applyGets(groupedItems map[string]([]models.MarkedItem), promo models.Promo) map[string]([]models.MarkedItem) {
 	for _, get := range promo.Gets {
 		groupedItems = applyGet(get, groupedItems, promo)
 	}
@@ -114,18 +107,35 @@ func applyGets(groupedItems map[string]([]markedItem), promo models.Promo) map[s
 type PromoCalculator struct {
 }
 
-func (p *PromoCalculator) Calculate(promo models.Promo, cart *models.Cart) {
-	groupedItems := make(map[string]([]markedItem))
-	for _, item := range cart.Items {
-		groupedItems[item.Category] = append(groupedItems[item.Category],
-			markedItem{item: item, markedBuys: make(map[string]bool), markedGets: make(map[string]float32)})
-	}
-	var count = 0
-	for count < 1 {
+func (p *PromoCalculator) applyPromo(promo models.Promo, groupedItems map[string]([]models.MarkedItem)) map[string]([]models.MarkedItem) {
+	for ;true; {
 		var appliedBuys = applyBuys(groupedItems, promo)
-		count = count + 1
+		if !appliedBuys.applied {
+      break;
+    }
 		groupedItems = appliedBuys.groupedItems
 		groupedItems = applyGets(groupedItems, promo)
-		fmt.Println(groupedItems)
 	}
+  return groupedItems
+}
+
+func (p *PromoCalculator) ApplyPromos(promos []models.Promo, cart *models.Cart) []models.MarkedItem {
+  groupedItems := make(map[string]([]models.MarkedItem))
+	for _, item := range cart.Items {
+		groupedItems[item.Category] = append(groupedItems[item.Category],
+			models.MarkedItem{Item: item, MarkedBuys: make(map[string]bool), MarkedGets: make(map[string]float32)})
+	}
+  for _, promo := range promos {
+    groupedItems = p.applyPromo(promo, groupedItems)
+  }
+  items := make([]models.MarkedItem, 0)
+  for _, item := range groupedItems {
+    items = append(items, item...)
+  }
+  return items
+}
+
+func NewCalculator() Calculator {
+  p := &PromoCalculator{}
+  return p
 }

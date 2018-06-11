@@ -33,3 +33,13 @@ type Promo struct {
 	Buys []Buy `json:"buys"`
 	Gets []Get `json:"gets"`
 }
+
+type PromofiedCart struct {
+
+}
+
+type MarkedItem struct {
+	Item       Item
+	MarkedBuys map[string]bool
+	MarkedGets map[string]float32
+}

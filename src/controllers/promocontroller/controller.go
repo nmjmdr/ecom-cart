@@ -11,10 +11,11 @@ import (
 	"encoding/json"
 	"net/http"
   "utils"
+  "promocache"
 )
 
 func GetPromos(w http.ResponseWriter, r *http.Request) {
-  promos := GetPromoCache().GetAll()
+  promos := promocache.GetPromoCache().GetAll()
   json, _ := json.Marshal(promos)
   utils.SendResult(w, r, json)
 }

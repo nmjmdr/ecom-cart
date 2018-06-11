@@ -9,6 +9,8 @@ import (
   "github.com/gorilla/mux"
   "errors"
   "fmt"
+  "promocalc"
+  "promocache"
 )
 
 
@@ -73,7 +75,25 @@ func ApplyPromos(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrorResponse(w, r, err)
 		return
 	}
-  fmt.Println(promofyRequest, err)
+
+  cart, ok := repository.Get().Get(id)
+  if !ok {
+    utils.SendNotFound(w, r)
+    return
+  }
+  promos := make([]models.Promo,0)
+  for _,promoId := range promofyRequest.Promos {
+    promo, ok := promocache.GetPromoCache().Get(promoId)
+    if !ok {
+      utils.SendErrorResponse(w, r, errors.New("Non existant promo id passed"))
+      return
+    }
+    promos = append(promos, promo)
+  }
+
+  var calculator = promocalc.NewCalculator()
+  markedItems := calculator.ApplyPromos(promos, &cart)
+  fmt.Println(markedItems)
   utils.SendStatusOK(w, r)
 }
 

@@ -1,4 +1,4 @@
-package promocontroller
+package promocache
 import "models"
 
 
