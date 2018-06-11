@@ -178,6 +178,26 @@ Examples promos as GO code:
 		Gets:        []models.Get{models.Get{Category: "shirts", All: true, Off: models.Off{Fixed: &models.Fixed{Price: 45}}}}}
 ```
 
+### Algorithm for apply promos:
+The algorithm to apply promos, groups items by category so that it can access items efficiently. Then for a given promo it executes the following logic
+```
+for true {
+        // check if any of the items (or combination of items) can act as triggers (or sources) for current promo
+	var appliedBuys = applyBuys(groupedItems, promo)
+	// if none of the items were triggers (or sources) for the current promo, break and return
+	if !appliedBuys.applied {
+		break
+	}
+	groupedItems = appliedBuys.groupedItems
+	// pass grouped items to apply promos 
+	// applyGets identifies the target items for a given promo and applies them
+	groupedItems = applyGets(groupedItems, promo)
+	}
+```
+_Note that the logic has to be repeatdely applied until it none of the target (or source) items match. This is required to especially implement rules such as "Buy 2 Get 1 Free"_
+
+
+
 Currently the project has been implemented with the following limitations:
 The project has the following limitations. These limitations can be addressed in future
 
