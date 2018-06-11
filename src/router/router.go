@@ -6,7 +6,7 @@ import "fmt"
 import "controllers/cartcontroller"
 import "controllers/promocontroller"
 
-func Start() {
+func Start(listenAddress string) {
 	r := mux.NewRouter()
 	// Ideally the routes would be defined in their own file: routes.js
 	r.HandleFunc("/status", StatusHandler).Methods("GET")
@@ -28,9 +28,11 @@ func Start() {
 	r.HandleFunc("/promos", promocontroller.GetPromos).Methods("GET")
 
 	go func() {
-		if err := http.ListenAndServe(":8090", r); err != nil {
+		if err := http.ListenAndServe(listenAddress, r); err != nil {
 			fmt.Println(err)
-		}
+		} else {
+      fmt.Println("Listening on port: 8090")
+    }
 	}()
 }
 

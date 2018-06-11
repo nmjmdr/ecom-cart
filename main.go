@@ -3,10 +3,15 @@ package main
 //import "promocalc"
 import "router"
 //import "models"
-//import "fmt"
+import "fmt"
+
+const ListenAddress = ":8090"
 
 func main() {
-	router.Start()
+	router.Start(ListenAddress)
+  fmt.Printf("Server listening on: %s ...",ListenAddress)
+  fmt.Println()
+  // List to quit channel here later, quit gracefully
 	select {}
   /*
   var p promocalc.Calculator
