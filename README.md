@@ -211,6 +211,7 @@ The project has the following limitations. These limitations can be addressed in
 
 ### Units tests
 Currently only promocalc package has unit tests 
+```
 go test promocalc -v
-
+```
 
